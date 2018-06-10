@@ -9,15 +9,17 @@ const config = require('./config');
 
 let helpers = {};
 
-// VALIDATE FORM DATA
+// VALIDATE INCOMING DATA
 helpers.validate = (type, data) => {
     switch (type) {
         case 'str':
-            return (typeof(data) == 'string' && data.trim().length > 0) ? data.trim() : false;
+            return typeof(data) == 'string' && data.trim().length > 0 ? data.trim() : false;
         case 'phone':
-            return (typeof(data) == 'string' && data.trim().length == 10) ? data.trim() : false;
+            return typeof(data) == 'string' && data.trim().length == 10 ? data.trim() : false;
         case 'bool':
-            return (typeof(data) == 'boolean' && data == true) ? true : false;
+            return typeof(data) == 'boolean' && data == true ? true : false;
+        case 'id':
+            return typeof(data) == 'string' && data.trim().length == 20 ? data.trim() : false;
         default:
             console.log('form type not specified');
             return false;
@@ -46,5 +48,30 @@ helpers.parseJsonToObject = str => {
         return {};
     }
 }
+
+// CREATE RANDOM STRING OF ALPHANUMERIC CHARACTERS
+helpers.createRandomString = strLength => {
+    strLength = typeof(strLength) == 'number' && strLength > 0 ? strLength : false;
+    if (strLength) {
+        // DEFINE ALL POSSIBLE CHARACTERS THAT CAN GO INTO STRING
+        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+
+        // START FINAL STRING
+        let str = '';
+        for (let i = 1; i <= strLength; i++) {
+            // GET RANDOM CHARACTER FROM STRING VARIABLE
+            let randomChar = possibleChars
+            .charAt(Math.floor(Math.random() * possibleChars.length));
+
+            // APPEND CHARACTER TO FINAL STRING
+            str += randomChar;
+        }
+
+        // RETURN STRING
+        return str;
+    } else {
+        return false;
+    }
+};
 
 module.exports = helpers;
