@@ -1,14 +1,18 @@
-// FOR STORING / EDITING DATA
 
 // VANILLA NODE DEPENDENCIES
 const fs = require('fs');
 const path = require('path');
 
-// CONTAINER FOR MODULE
+// LOCAL FILE DEPENDENCIES
+const helpers = require('./helpers');
+
 let lib = {};
+
+
 
 // DEFINE BASE DIR FOR /.data
 lib.baseDir = path.join(__dirname, '/../.data/');
+// console.log(lib.baseDir);
 
 // WRITE DATA TO A FILE
 lib.create = (dir, file, data, callback) => {
@@ -47,8 +51,14 @@ lib.create = (dir, file, data, callback) => {
 
 // READ DATA FROM FILE
 lib.read = (dir, file, callback) => {
+    // console.log(lib.baseDir + dir + '/' + file + '.json');
     fs.readFile(lib.baseDir + dir + '/' + file + '.json', 'utf8', (err, data) => {
-        callback(err, data);
+        if (!err && data) {
+            const parsedData = helpers.parseJsonToObject(data);
+            callback(false, parsedData);
+        } else {
+            callback(err, data);
+        }
     });
 };
 
@@ -96,11 +106,7 @@ lib.update = (dir, file, data, callback) => {
 lib.delete = (dir, file, callback) => {
     // UNLINK THE FILE
     fs.unlink(lib.baseDir + dir + '/' + file + '.json', err => {
-        if (!err) {
-            callback(false);
-        } else {
-            callback('error deleting file.');
-        }
+        (!err) ? callback(false) : callback('error deleting file.');
     });
 };
 

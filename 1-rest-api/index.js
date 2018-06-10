@@ -1,14 +1,15 @@
-// PRIMARY FILE
 
 // VANILLA NODE DEPENDENCIES
+const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const url = require('url');
 const stringDecoder = require('string_decoder').StringDecoder;
-const fs = require('fs');
+const url = require('url');
 
 // LOCAL FILE DEPENDENCIES
-const config = require('./config');
+const config = require('./lib/config');
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 
 
@@ -17,7 +18,7 @@ const httpServer = http.createServer((req, res) => {
     unifiedServer(req, res);
 });
 
-// START THE SERVER
+// START HTTP SERVER
 httpServer.listen(config.httpPort, () => {
     console.log(`The server is listening on port ${ config.httpPort } in ${ config.envName }...`);
 });
@@ -37,7 +38,8 @@ httpsServer.listen(config.httpsPort, () => {
     console.log(`The server is listening on port ${ config.httpsPort } in ${ config.envName }...`);
 });
 
-// SERVER LOGIC FOR HTTP & HTTPS
+// BOTH HTTP & HTTPS SERVERS ARE RUNNING
+// WHEN THIS FUNCTION IS CALLED
 const unifiedServer = (req, res) => {
     // GET THE URL AND PARSE IT
     const parsedUrl = url.parse(req.url, true);
@@ -55,19 +57,21 @@ const unifiedServer = (req, res) => {
     // GET THE HEADERS AS AN OBJECT
     const headers = req.headers;
 
-    // GET THE PAYLOAD, IF ANY
+    // CREATE EMPTY STRING TO STORE INCOMING DATA
     const decoder = new stringDecoder('utf-8');
     let buffer = '';
 
+    // NOT ALL REQUESTS RETURN DATA
     req.on('data', data => {
         buffer += decoder.write(data);
     });
 
+    // ALL REQUESTS END
     req.on('end', () => {
         buffer += decoder.end();
 
-        // CHOOSE THE HANDLER THIS REQUEST SHOULD GO TO.
-        // IF ONE IS NOT FOUND, USE THE NOTFOUND HANDLER.
+        // CHOOSE HANDLER FOR REQUEST
+        // IF NOT FOUND, USE 404 HANDLER
         const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
 
         // CONSTRUCT THE DATA OBJECT TO SEND TO HANDLER
@@ -76,18 +80,18 @@ const unifiedServer = (req, res) => {
             'queryStringObject' : queryStringObject,
             'method' : method,
             'headers' : headers,
-            'payload' : buffer
+            'payload' : helpers.parseJsonToObject(buffer)
         };
 
         // ROUTE TO THE REQUEST SPECIFIED IN CHOSENHANDLER
         chosenHandler(data, (statusCode, payload) => {
             // USE THE STATUS CODE CALLED BACK BY THE HANDLER...
             // OR DEFAULT TO 200
-            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+            statusCode = (typeof(statusCode) == 'number') ? statusCode : 200;
 
             // USE THE PAYLOAD CALLED BACK BY THE HANDLER...
             // OR DEFAULT TO AN EMPTY OBJECT
-            payload = typeof(payload) == 'object' ? payload : {};
+            payload = (typeof(payload) == 'object') ? payload : {};
 
             // CONVERT THE PAYLOAD TO A STRING
             const payloadString = JSON.stringify(payload);
@@ -98,31 +102,13 @@ const unifiedServer = (req, res) => {
             res.end(payloadString);
 
             // LOG THE REQUEST
-            console.log('Returning this response: ', statusCode, payloadString);
+            console.log(`${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
         });
-
-        // console.log('Request received with this payload: ', buffer);
-
-        // console.log(`${ method }: ${ trimmedPath }, `, queryStringObject);
-
-        // console.log(`Request received with these headers: `, headers);
     });
-};
-
-// DEFINE THE HANDLERS
-const handlers = {};
-
-// PING HANDLER
-handlers.ping = (data, callback) => {
-    callback(200);
-};
-
-// NOT FOUND HANDLER
-handlers.notFound = (data, callback) => {
-    callback(404);
 };
 
 // DEFINE A REQUEST ROUTER
 const router = {
-    'ping' : handlers.ping
+    'ping' : handlers.ping,
+    'users' : handlers.users
 };

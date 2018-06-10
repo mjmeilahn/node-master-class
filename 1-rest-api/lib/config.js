@@ -1,6 +1,4 @@
-// CREATE AND EXPORT CONFIGURATION VARIABLES
 
-// CONTAINER FOR ALL ENVIRONMENTS
 let environments = {};
 
 // CONVENTION ON WEB PORTS FOR HTTP & HTTPS ARE:
@@ -11,14 +9,16 @@ let environments = {};
 environments.staging = {
     'httpPort' : 3000,
     'httpsPort' : 3001,
-    'envName' : 'staging'
+    'envName' : 'staging',
+    'hashingSecret' : 'thisISaSECRET'
 };
 
 // PRODUCTION
 environments.production = {
     'httpPort' : 5000,
     'httpsPort' : 5001,
-    'envName' : 'production'
+    'envName' : 'production',
+    'hashingSecret' : 'thisISalsoAsecret'
 };
 
 const currentEnvironment = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
