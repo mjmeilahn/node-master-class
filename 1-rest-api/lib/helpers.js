@@ -1,9 +1,12 @@
 
 // VANILLA NODE DEPENDENCIES
 const crypto = require('crypto');
+const queryString = require('querystring');
+const https = require('https');
 
 // LOCAL FILE DEPENDENCIES
 const config = require('./config');
+const validate = require('./validate');
 
 
 
@@ -56,6 +59,65 @@ helpers.createRandomString = strLength => {
         return str;
     } else {
         return false;
+    }
+};
+
+// SEND SMS MESSAGE VIA TWILIO
+helpers.sendTwilioSms = (phone, msg, callback) => {
+    // VALIDATE PHONE
+    phone = validate.phone(phone);
+    // msg = msg.trim().length <= 1600 ? validate.string(msg) : false;
+    msg = validate.smsMsg(msg);
+    
+    if (phone && msg) {
+        // CONFIGURE REQUEST PAYLOAD
+        const payload = {
+            'From' : config.twilio.fromPhone,
+            'To' : '+1' + phone,
+            'Body' : msg
+        };
+
+        // STRINGIFY PAYLOAD
+        const stringPayload = queryString.stringify(payload);
+
+        // CONFIGURE REQUEST DETAILS
+        const requestDetails = {
+            'protocol' : 'https:',
+            'hostname' : 'api.twilio.com',
+            'method' : 'POST',
+            'path' : `/2010-04-01/Accounts/${config.twilio.accountSid}/Messages.json`,
+            'auth' : `${config.twilio.accountSid}:${config.twilio.authToken}`,
+            'headers' : {
+                'Content-Type' : 'application/x-www-form-urlencoded',
+                'Content-Length' : Buffer.byteLength(stringPayload)
+            }
+        };
+
+        // INSTANIATE REQUEST OBJECT
+        const req = https.request(requestDetails, res => {
+            // GRAB STATUS OF REQUEST
+            const status = res.statusCode;
+
+            // CALLBACK IF SUCCESS WENT THROUGH
+            if (status == 200 || status == 201) {
+                callback(false);
+            } else {
+                callback(`Status code returned was ${status}`);
+            }
+        });
+
+        // BIND TO ERROR EVENT SO NOTHING IS THROWN
+        req.on('error', e => {
+            callback(e);
+        });
+
+        // ADD THE PAYLOAD
+        req.write(stringPayload);
+
+        // END THE REQUEST
+        req.end();
+    } else {
+        callback('given parameters were missing or invalid');
     }
 };
 

@@ -5,7 +5,7 @@ Following along with https://pirple.thinkific.com/ - also available on Udemy at 
 8.11.2+
 
 #### JavaScript Version: 
-Presented in ES5, I'm translating over to ES6+ versions and refactoring some spaghetti code into readable libraries over time. (06/11/18)
+Presented in ES5, I'm translating over to ES6+ versions and refactoring some course spaghetti code into readable helper libraries which'll take a while :/
 
 #### Course Includes: 
     1. Building RESTful API

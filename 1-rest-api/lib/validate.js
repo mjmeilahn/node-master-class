@@ -59,4 +59,8 @@ validate.checks = data => {
     return typeof(data) == 'object' && data instanceof Array && data.length > 0 ? data : [];
 };
 
+validate.smsMsg = data => {
+    return typeof(data) == 'string' && data.trim().length > 0 && data.trim().length <= 1600 ? data.trim() : false;
+};
+
 module.exports = validate;
