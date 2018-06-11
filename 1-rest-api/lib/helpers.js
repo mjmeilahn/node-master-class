@@ -9,23 +9,6 @@ const config = require('./config');
 
 let helpers = {};
 
-// VALIDATE INCOMING DATA
-helpers.validate = (type, data) => {
-    switch (type) {
-        case 'str':
-            return typeof(data) == 'string' && data.trim().length > 0 ? data.trim() : false;
-        case 'phone':
-            return typeof(data) == 'string' && data.trim().length == 10 ? data.trim() : false;
-        case 'bool':
-            return typeof(data) == 'boolean' && data == true ? true : false;
-        case 'id':
-            return typeof(data) == 'string' && data.trim().length == 20 ? data.trim() : false;
-        default:
-            console.log('form type not specified');
-            return false;
-    }
-};
-
 // HASHES A STRING
 helpers.hash = str => {
     if (typeof(str) == 'string' && str.length > 0) {
@@ -40,6 +23,8 @@ helpers.hash = str => {
 };
 
 // PARSE JSON TO OBJECT, WITH TRY-CATCH
+// @TODO: remove this helper function and 
+// use local validate library I've made instead
 helpers.parseJsonToObject = str => {
     try {
         const obj = JSON.parse(str);
@@ -54,7 +39,7 @@ helpers.createRandomString = strLength => {
     strLength = typeof(strLength) == 'number' && strLength > 0 ? strLength : false;
     if (strLength) {
         // DEFINE ALL POSSIBLE CHARACTERS THAT CAN GO INTO STRING
-        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+        const possibleChars = 'abcdefghijklmnopqrstuvwxyz0123456789';
 
         // START FINAL STRING
         let str = '';
