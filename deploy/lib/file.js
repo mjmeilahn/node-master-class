@@ -110,5 +110,22 @@ lib.delete = (dir, file, callback) => {
     });
 };
 
+// LIST ALL ITEMS IN A DIRECTORY
+lib.list = (dir, callback) => {
+    fs.readdir(lib.baseDir + dir + '/', (err, data) => {
+        if (!err && data && data.length > 0) {
+            let trimmedFileNames = [];
+
+            data.forEach(fileName => {
+                trimmedFileNames.push(fileName.replace('.json', ''));
+            });
+
+            callback(false, trimmedFileNames);
+        } else {
+            callback(err, data);
+        }
+    });
+}
+
 // EXPORT MODULE
 module.exports = lib;

@@ -1,3 +1,14 @@
+/* 
+* * * * * * * * * * * * * * * * * * * * * * * * *
+*   AUTHOR:  MATTHEW J. MEILAHN
+*   GITHUB:  https://github.com/mjmeilahn
+*   PURPOSE: DOUBLE-CHECK ALL INCOMING DATA
+*   NOTES:   MODIFY "CUSTOM" AREA TO YOUR LIKING
+* * * * * * * * * * * * * * * * * * * * * * * * *
+*/
+
+
+// @TODO: List expected param types and returned values
 
 let validate = {};
 
@@ -6,6 +17,7 @@ let validate = {};
 *   BASIC TYPE CHECKING
 * * * * * * * * * * * *
 */
+
 validate.boolean = data => {
     return typeof(data) == 'boolean' && data == true ? true : false;
 };
@@ -19,7 +31,12 @@ validate.number = (min, max, data) => {
     return typeof(data) == 'number' && data % 1 === 0 && data >= min && data <= max ? data : false;
 };
 
+validate.object = data => {
+    return typeof(data) == 'object' && data !== null ? data : {};
+};
+
 validate.JSONToObject = data => {
+    // VALIDATE THAT JSON CAN BE CONVERTED TO OBJECT
     try {
         const obj = JSON.parse(str);
         return obj;
@@ -35,6 +52,11 @@ validate.JSONToObject = data => {
 *  CUSTOM TYPE CHECKING
 * * * * * * * * * * * *
 */
+
+validate.numberHasValue = data => {
+    return typeof(data) == 'number' && data % 1 === 0 && data >= 1 ? data : false;
+};
+
 validate.phone = data => {
     return typeof(data) == 'string' && data.trim().length == 10 ? data.trim() : false;
 };
@@ -49,6 +71,10 @@ validate.protocol = data => {
 
 validate.http = data => {
     return typeof(data) == 'string' && ['get', 'post', 'put', 'delete'].indexOf(data) > -1 ? data : false;
+};
+
+validate.state = data => {
+    return typeof(data) == 'string' && ['up', 'down'].indexOf(data) > -1 ? data : 'down';
 };
 
 validate.successCodes = data => {

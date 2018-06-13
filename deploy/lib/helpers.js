@@ -114,7 +114,7 @@ helpers.sendTwilioSms = (phone, msg, callback) => {
         // ADD THE PAYLOAD
         req.write(stringPayload);
 
-        // END THE REQUEST
+        // END REQUEST / AKA SEND REQUEST
         req.end();
     } else {
         callback('given parameters were missing or invalid');
