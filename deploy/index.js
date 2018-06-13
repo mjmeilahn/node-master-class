@@ -1,4 +1,7 @@
 
+// https://pirple.thinkific.com/courses/take/the-nodejs-master-class
+
+
 // LOCAL FILE DEPENDENCIES
 const server = require('./lib/server');
 const workers = require('./lib/workers');

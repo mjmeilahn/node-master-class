@@ -10,6 +10,7 @@ const url = require('url');
 const file = require('./file');
 const helpers = require('./helpers');
 const validate = require('./validate');
+const logs = require('./logs');
 
 
 
@@ -74,9 +75,9 @@ workers.performCheck = data => {
 
     const requestDetails = {
         'protocol' : data.protocol + ':',
-        'hostName' : hostName,
+        'hostname' : hostName,
         'method' : data.method.toUpperCase(),
-        'path' : path + ':80',
+        'path' : path,
         'timeout' : data.timeoutSeconds * 1000
     };
 
@@ -86,7 +87,6 @@ workers.performCheck = data => {
     const req = moduleToUse.request(requestDetails, res => {
         // GET STATUS OF SENT REQUEST
         const status = res.statusCode;
-        console.log('got response');
 
         // UPDATE CHECKOUTCOME & PASS DATA
         checkOutcome.responseCode = status;
@@ -100,7 +100,7 @@ workers.performCheck = data => {
     // BIND TO ERROR EVENT SO SINGLE-THREAD IS NOT THROWN
     req.on('error', e => {
         // UPDATE THE CHECKOUTCOME & PASS DATA
-        checkOutcome.error = { 'error' : true,'value' : e };
+        checkOutcome.error = { 'error' : true, 'value' : e };
         if (!outcomeSent) {
             console.log('outcome error happened');
             // console.log(e);
@@ -112,7 +112,7 @@ workers.performCheck = data => {
     // BIND TO THE TIMEOUT
     req.on('timeout', e => {
         // UPDATE THE CHECKOUTCOME & PASS DATA
-        checkOutcome.error = { 'error' : true,'value' : 'timeout' };
+        checkOutcome.error = { 'error' : true, 'value' : 'timeout' };
         if (!outcomeSent) {
             console.log('outcome timeout happened');
             workers.processCheckOutcome(data, checkOutcome);
@@ -128,15 +128,17 @@ workers.processCheckOutcome = (data, outcome) => {
     // GET INITIAL STATE
     const checkState = !outcome.error && outcome.responseCode && data.successCodes.indexOf(outcome.responseCode) > -1 ? 'up' : 'down';
 
-    console.log('workers.js : ' + outcome.responseCode);
-
     // IF ALERT IS NEEDED
-    let alertNeeded = data.lastChecked && data.state !== checkState ? true : false;
+    const alertNeeded = data.lastChecked && data.state !== checkState ? true : false;
+    const timeOfCheck = Date.now();
+
+    // LOG THE OUTCOME
+    workers.log(data, outcome, checkState, alertNeeded, timeOfCheck);
 
     // UPDATE /.data/checks DATA
     let newCheckData = data;
-    newCheckData.state = data.state;
-    newCheckData.lastChecked = Date.now();
+    newCheckData.state = checkState;
+    newCheckData.lastChecked = timeOfCheck;
 
     // SAVE UPDATES
     file.update('checks', newCheckData.id, newCheckData, err => {
@@ -164,11 +166,36 @@ workers.alertStatus = data => {
     });
 }
 
+workers.log = (data, outcome, state, alertNeeded, timeOfCheck) => {
+    // FORMAT LOG DATA
+    const logData = {
+        'check' : data,
+        'outcome' : outcome,
+        'state' : state,
+        'alert' : alertNeeded,
+        'time' : timeOfCheck
+    };
+
+    // CONVERT TO JSON STRING
+    const logString = JSON.stringify(logData);
+
+    // CREATE FILE NAME
+    const logFileName = data.id;
+
+    // APPEND LOG STRING TO FILE
+    logs.append(logFileName, logString, err => {
+        if (!err) {
+            console.log('SUCCESS: Logging to file');
+        } else {
+            console.log('ERROR: Logging failed');
+        }
+    });
+};
 
 workers.loop = () => {
     setInterval(() => {
         workers.gatherAllChecks();
-    }, 1000 * 2); // ONCE PER 2 SECONDS
+    }, 1000 * 5); // ONCE PER FIVE SECONDS
 };
 
 workers.init = () => {

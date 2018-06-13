@@ -3,7 +3,6 @@
 *   AUTHOR:  MATTHEW J. MEILAHN
 *   GITHUB:  https://github.com/mjmeilahn
 *   PURPOSE: DOUBLE-CHECK ALL INCOMING DATA
-*   NOTES:   MODIFY "CUSTOM" AREA TO YOUR LIKING
 * * * * * * * * * * * * * * * * * * * * * * * * *
 */
 
@@ -12,11 +11,9 @@
 
 let validate = {};
 
-/* 
-* * * * * * * * * * * *
-*   BASIC TYPE CHECKING
-* * * * * * * * * * * *
-*/
+
+
+// BASIC TYPE CHECKING
 
 validate.boolean = data => {
     return typeof(data) == 'boolean' && data == true ? true : false;
@@ -24,6 +21,10 @@ validate.boolean = data => {
 
 validate.string = data => {
     return typeof(data) == 'string' && data.trim().length > 0 ? data.trim() : false;
+};
+
+validate.numberHasValue = data => {
+    return typeof(data) == 'number' && data % 1 === 0 && data >= 1 ? data : false;
 };
 
 validate.number = (min, max, data) => {
@@ -35,27 +36,9 @@ validate.object = data => {
     return typeof(data) == 'object' && data !== null ? data : {};
 };
 
-validate.JSONToObject = data => {
-    // VALIDATE THAT JSON CAN BE CONVERTED TO OBJECT
-    try {
-        const obj = JSON.parse(str);
-        return obj;
-    } catch(e) {
-        return {};
-    }
-};
 
 
-
-/* 
-* * * * * * * * * * * *
-*  CUSTOM TYPE CHECKING
-* * * * * * * * * * * *
-*/
-
-validate.numberHasValue = data => {
-    return typeof(data) == 'number' && data % 1 === 0 && data >= 1 ? data : false;
-};
+// CUSTOM TYPE CHECKING
 
 validate.phone = data => {
     return typeof(data) == 'string' && data.trim().length == 10 ? data.trim() : false;
