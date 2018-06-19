@@ -6,7 +6,7 @@ const https = require('https');
 
 // LOCAL FILE DEPENDENCIES
 const config = require('./config');
-const validate = require('./validate');
+const type = require('./type');
 
 
 
@@ -65,9 +65,9 @@ helpers.createRandomString = strLength => {
 // SEND SMS MESSAGE VIA TWILIO
 helpers.sendTwilioSms = (phone, msg, callback) => {
     // VALIDATE PHONE
-    phone = validate.phone(phone);
-    // msg = msg.trim().length <= 1600 ? validate.string(msg) : false;
-    msg = validate.smsMsg(msg);
+    phone = type.phone(phone);
+    // msg = msg.trim().length <= 1600 ? type.string(msg) : false;
+    msg = type.smsMsg(msg);
     
     if (phone && msg) {
         // CONFIGURE REQUEST PAYLOAD

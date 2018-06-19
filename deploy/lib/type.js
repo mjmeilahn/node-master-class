@@ -9,30 +9,30 @@
 
 // @TODO: List expected param types and returned values
 
-let validate = {};
+let type = {};
 
 
 
 // BASIC TYPE CHECKING
 
-validate.boolean = data => {
+type.boolean = data => {
     return typeof(data) == 'boolean' && data == true ? true : false;
 };
 
-validate.string = data => {
+type.string = data => {
     return typeof(data) == 'string' && data.trim().length > 0 ? data.trim() : false;
 };
 
-validate.numberHasValue = data => {
+type.number = data => {
     return typeof(data) == 'number' && data % 1 === 0 && data >= 1 ? data : false;
 };
 
-validate.number = (min, max, data) => {
+type.numberHasRange = (min, max, data) => {
     // PROVIDE RANGE TO VALIDATE
     return typeof(data) == 'number' && data % 1 === 0 && data >= min && data <= max ? data : false;
 };
 
-validate.object = data => {
+type.object = data => {
     return typeof(data) == 'object' && data !== null ? data : {};
 };
 
@@ -40,36 +40,36 @@ validate.object = data => {
 
 // CUSTOM TYPE CHECKING
 
-validate.phone = data => {
+type.phone = data => {
     return typeof(data) == 'string' && data.trim().length == 10 ? data.trim() : false;
 };
 
-validate.id = data => {
+type.id = data => {
     return typeof(data) == 'string' && data.trim().length == 20 ? data.trim() : false;
 };
 
-validate.protocol = data => {
+type.protocol = data => {
     return typeof(data) == 'string' && ['http', 'https'].indexOf(data) > -1 ? data : false;
 };
 
-validate.http = data => {
+type.http = data => {
     return typeof(data) == 'string' && ['get', 'post', 'put', 'delete'].indexOf(data) > -1 ? data : false;
 };
 
-validate.state = data => {
+type.state = data => {
     return typeof(data) == 'string' && ['up', 'down'].indexOf(data) > -1 ? data : 'down';
 };
 
-validate.successCodes = data => {
+type.successCodes = data => {
     return typeof(data) == 'object' && data instanceof Array && data.length > 0 ? data : false;
 };
 
-validate.checks = data => {
+type.checks = data => {
     return typeof(data) == 'object' && data instanceof Array && data.length > 0 ? data : [];
 };
 
-validate.smsMsg = data => {
+type.smsMsg = data => {
     return typeof(data) == 'string' && data.trim().length > 0 && data.trim().length <= 1600 ? data.trim() : false;
 };
 
-module.exports = validate;
+module.exports = type;

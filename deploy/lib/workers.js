@@ -9,7 +9,7 @@ const url = require('url');
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
 const helpers = require('./helpers');
-const validate = require('./validate');
+const type = require('./type');
 const logs = require('./logs');
 
 
@@ -39,18 +39,18 @@ workers.gatherAllChecks = () => {
 workers.validateCheckData = data => {
 
     // VALIDATE INCOMING DATA
-    data = validate.object(data);
-    data.id = validate.id(data.id);
-    data.phone = validate.phone(data.phone);
-    data.protocol = validate.protocol(data.protocol);
-    data.url = validate.string(data.url);
-    data.method = validate.http(data.method);
-    data.successCodes = validate.successCodes(data.successCodes);
-    data.timeoutSeconds = validate.number(1, 5, data.timeoutSeconds);
+    data = type.object(data);
+    data.id = type.id(data.id);
+    data.phone = type.phone(data.phone);
+    data.protocol = type.protocol(data.protocol);
+    data.url = type.string(data.url);
+    data.method = type.http(data.method);
+    data.successCodes = type.successCodes(data.successCodes);
+    data.timeoutSeconds = type.number(data.timeoutSeconds);
 
     // SET KEYS IF BACKGROUND WORKERS MAY HAVE NOT HAVE SET
-    data.state = validate.state(data.state);
-    data.lastChecked = validate.numberHasValue(data.lastChecked);
+    data.state = type.state(data.state);
+    data.lastChecked = type.number(data.lastChecked);
 
     if (data.id && data.phone && data.protocol && data.url && data.method && data.successCodes && data.timeoutSeconds) {
         workers.performCheck(data);

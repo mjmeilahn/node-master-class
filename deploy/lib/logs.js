@@ -9,7 +9,7 @@ const zlib = require('zlib');
 let logs = {};
 
 logs.append = () => {
-
+    
 };
 
 module.exports = logs;

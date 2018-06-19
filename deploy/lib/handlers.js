@@ -1,13 +1,13 @@
 
 /*
-* @TODO: Online course has heavy nested callbacks targeting earlier versions of JavaScript (ES5) - refactor into Promise pattern after course is finished
+* @TODO: Online course has heavy nested callbacks targeting earlier versions of JavaScript (ES5) - refactor into Promise pattern after course is finished :/
 */
 
 
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
 const helpers = require('./helpers');
-const validate = require('./validate');
+const type = require('./type');
 const config = require('./config');
 
 let handlers = {};
@@ -36,11 +36,11 @@ handlers._users = {};
 // REQUIRED: FIRST NAME, LAST NAME, PHONE, PASSWORD, tosAGREEMENT
 handlers._users.post = (data, callback) => {
     // VALIDATE INCOMING DATA
-    const firstName = validate.string(data.payload.firstName);
-    const lastName = validate.string(data.payload.lastName);
-    const phone = validate.phone(data.payload.phone);
-    const password = validate.string(data.payload.password);
-    const tosAgreement = validate.boolean(data.payload.tosAgreement);
+    const firstName = type.string(data.payload.firstName);
+    const lastName = type.string(data.payload.lastName);
+    const phone = type.phone(data.payload.phone);
+    const password = type.string(data.payload.password);
+    const tosAgreement = type.boolean(data.payload.tosAgreement);
 
     // CHECK THAT ALL FIELDS ARE FILLED OUT
     if (firstName && lastName && phone && password && tosAgreement) {
@@ -87,11 +87,11 @@ handlers._users.post = (data, callback) => {
 /* @TODO: Refactor to Promise pattern */
 handlers._users.get = (data, callback) => {
     // CHECK PHONE NUMBER IS VALID
-    const phone = validate.phone(data.queryStringObject.phone);
+    const phone = type.phone(data.queryStringObject.phone);
 
     if (phone) {
         // GET TOKEN FROM HEADERS
-        const token = validate.string(data.headers.token);
+        const token = type.string(data.headers.token);
 
         // VERIFY TOKEN IS VALID FOR PHONE
         handlers._tokens.verifyToken(token, phone, tokenIsValid => {
@@ -121,12 +121,12 @@ handlers._users.get = (data, callback) => {
 /* @TODO Refactor into Promise pattern */
 handlers._users.put = (data, callback) => {
     // CHECK PHONE NUMBER IS VALID
-    const phone = validate.phone(data.payload.phone);
+    const phone = type.phone(data.payload.phone);
 
     // CHECK FOR OPTIONAL FIELDS
-    const firstName = validate.string(data.payload.firstName);
-    const lastName = validate.string(data.payload.lastName);
-    const password = validate.string(data.payload.password);
+    const firstName = type.string(data.payload.firstName);
+    const lastName = type.string(data.payload.lastName);
+    const password = type.string(data.payload.password);
 
     // ERROR IF PHONE IS INVALID
     if (phone) {
@@ -134,7 +134,7 @@ handlers._users.put = (data, callback) => {
         if (firstName || lastName || password) {
 
             // GET TOKEN FROM HEADERS
-            const token = validate.string(data.headers.token);
+            const token = type.string(data.headers.token);
             
             // VERIFY TOKEN IS VALID FOR PHONE
             handlers._tokens.verifyToken(token, phone, tokenIsValid => {
@@ -176,11 +176,11 @@ handlers._users.put = (data, callback) => {
 // REQUIRED: PHONE
 handlers._users.delete = (data, callback) => {
     // CHECK PHONE IS VALID
-    const phone = validate.phone(data.queryStringObject.phone);
+    const phone = type.phone(data.queryStringObject.phone);
 
     if (phone) {
         // GET TOKEN FROM HEADERS
-        const token = validate.string(data.headers.token);
+        const token = type.string(data.headers.token);
 
         // VERIFY TOKEN IS VALID FOR PHONE
         handlers._tokens.verifyToken(token, phone, tokenIsValid => {
@@ -190,7 +190,7 @@ handlers._users.delete = (data, callback) => {
                         file.delete('users', phone, err => {
                             if (!err) {
                                 // DELETE CHECKS ASSOCIATED WITH USER
-                                const userChecks = validate.checks(data.checks);
+                                const userChecks = type.checks(data.checks);
                                 const checksToDelete = userChecks.length;
 
                                 if (checksToDelete > 0) {
@@ -253,8 +253,8 @@ handlers._tokens = {};
 // REQUIRED: PHONE, PASSWORD
 /* @TODO: Refactor into promise pattern */
 handlers._tokens.post = (data, callback) => {
-    const phone = validate.phone(data.payload.phone);
-    const password = validate.string(data.payload.password);
+    const phone = type.phone(data.payload.phone);
+    const password = type.string(data.payload.password);
 
     if (phone && password) {
         // LOOK UP MATCHING USER
@@ -300,8 +300,8 @@ handlers._tokens.post = (data, callback) => {
 /* @TODO: Refactor into Promise pattern */
 handlers._tokens.put = (data, callback) => {
     // CHECK ID IS VALID
-    const id = validate.id(data.payload.id);
-    const extend = validate.boolean(data.payload.extend);
+    const id = type.id(data.payload.id);
+    const extend = type.boolean(data.payload.extend);
 
     if (id && extend) {
         // LOOK UP TOKEN
@@ -337,7 +337,7 @@ handlers._tokens.put = (data, callback) => {
 /* @TODO: Refactor into Promise pattern */
 handlers._tokens.get = (data, callback) => {
     // CHECK ID IS VALID
-    const id = validate.id(data.queryStringObject.id);
+    const id = type.id(data.queryStringObject.id);
     if (id) {
         file.read('tokens', id, (err, tokenData) => {
             if (!err && tokenData) {
@@ -355,7 +355,7 @@ handlers._tokens.get = (data, callback) => {
 // REQUIRED: ID
 handlers._tokens.delete = (data, callback) => {
     // CHECK ID IS VALID
-    const id = validate.id(data.queryStringObject.id);
+    const id = type.id(data.queryStringObject.id);
 
     if (id) {
         file.read('tokens', id, (err, data) => {
@@ -412,15 +412,15 @@ handlers._checks = {};
 /* @TODO: Refactor into Promise pattern */
 handlers._checks.post = (data, callback) => {
     // VALIDATE INCOMING DATA
-    const protocol = validate.protocol(data.payload.protocol);
-    const url = validate.string(data.payload.url);
-    const method = validate.http(data.payload.method);
-    const successCodes = validate.successCodes(data.payload.successCodes);
-    const timeoutSeconds = validate.number(1, 5, data.payload.timeoutSeconds);
+    const protocol = type.protocol(data.payload.protocol);
+    const url = type.string(data.payload.url);
+    const method = type.http(data.payload.method);
+    const successCodes = type.successCodes(data.payload.successCodes);
+    const timeoutSeconds = type.number(data.payload.timeoutSeconds);
 
     if (protocol && url && method && successCodes && timeoutSeconds) {
         // GET TOKEN FROM HEADERS
-        const token = validate.string(data.headers.token);
+        const token = type.string(data.headers.token);
 
         // LOOK UP USER BY TOKEN
         file.read('tokens', token, (err, tokenData) => {
@@ -430,7 +430,7 @@ handlers._checks.post = (data, callback) => {
                 // LOOK UP USER
                 file.read('users', userPhone, (err, userData) => {
                     if (!err && userData) {
-                        const userChecks = validate.checks( userData.checks);
+                        const userChecks = type.checks( userData.checks);
 
                         // VERIFY USER HAS LESS THAN 5 CHECKS
                         if (userChecks.length < config.maxChecks) {
@@ -487,14 +487,14 @@ handlers._checks.post = (data, callback) => {
 // REQUIRED: ID
 handlers._checks.get = (data, callback) => {
     // CHECK ID IS VALID
-    const id = validate.id(data.queryStringObject.id);
+    const id = type.id(data.queryStringObject.id);
 
     if (id) {
         // LOOK UP THE CHECK
         file.read('checks', id, (err, checkData) => {
             if (!err && checkData) {
                 // GET TOKEN FROM HEADERS
-                const token = validate.string(data.headers.token);
+                const token = type.string(data.headers.token);
 
                 // VERIFY TOKEN IS VALID FOR USER WHO CREATED CHECK
                 handlers._tokens.verifyToken(token, checkData.phone, tokenIsValid => {
@@ -519,12 +519,12 @@ handlers._checks.get = (data, callback) => {
 // REQUIRED - ID & AT LEAST ONE OF: PROTOCOL, URL, METHOD, SUCCESSCODES OR TIMEOUT SECONDS
 /* @TODO: Refactor into Promise pattern */
 handlers._checks.put = (data, callback) => {
-    const id = validate.id(data.payload.id);
-    const protocol = validate.protocol(data.payload.protocol);
-    const url = validate.string(data.payload.url);
-    const method = validate.http(data.payload.method);
-    const successCodes = validate.successCodes(data.payload.successCodes);
-    const timeoutSeconds = validate.number(1, 5, data.payload.timeoutSeconds);
+    const id = type.id(data.payload.id);
+    const protocol = type.protocol(data.payload.protocol);
+    const url = type.string(data.payload.url);
+    const method = type.http(data.payload.method);
+    const successCodes = type.successCodes(data.payload.successCodes);
+    const timeoutSeconds = type.number(data.payload.timeoutSeconds);
 
     if (id) {
         if (protocol || url || method || successCodes || timeoutSeconds) {
@@ -532,7 +532,7 @@ handlers._checks.put = (data, callback) => {
             file.read('checks', id, (err, checkData) => {
                 if (!err && checkData) {
                     // GET TOKEN FROM HEADERS
-                    const token = validate.string(data.headers.token);
+                    const token = type.string(data.headers.token);
 
                     // VERIFY TOKEN IS VALID FOR USER WHO CREATED CHECK
                     handlers._tokens.verifyToken(token, checkData.phone, tokenIsValid => {
@@ -573,14 +573,14 @@ handlers._checks.put = (data, callback) => {
 /* @TODO: Refactor into Promise pattern */
 handlers._checks.delete = (data, callback) => {
     // CHECK ID IS VALID
-    const id = validate.id(data.queryStringObject.id);
+    const id = type.id(data.queryStringObject.id);
 
     if (id) {
         // LOOK UP CHECK
         file.read('checks', id, (err, checkData) => {
             if (!err && checkData) {
                 // GET TOKEN FROM HEADERS
-                const token = validate.string(data.headers.token);
+                const token = type.string(data.headers.token);
 
                 // VERIFY TOKEN IS VALID FOR PHONE
                 handlers._tokens.verifyToken(token, checkData.phone, tokenIsValid => {
@@ -592,7 +592,7 @@ handlers._checks.delete = (data, callback) => {
                                 file.read('users', checkData.phone, (err, userData) => {
                                     if (!err && userData) {
                                         // GET ALL USER CHECKS
-                                        const userChecks = validate.checks( userData.checks);
+                                        const userChecks = type.checks( userData.checks);
 
                                         // REMOVE CHECK FROM USER
                                         const checkPosition = userChecks.indexOf(id);
