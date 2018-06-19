@@ -8,6 +8,10 @@ const https = require('https');
 const stringDecoder = require('string_decoder').StringDecoder;
 const url = require('url');
 const path = require('path');
+const util = require('util');
+
+// CONDITIONALLY SHOW CONSOLE.LOGS WITH NODE_DEBUG=server
+const debug = util.debuglog('server');
 
 // LOCAL FILE DEPENDENCIES
 const config = require('./config');
@@ -95,8 +99,14 @@ server.unifiedServer = (req, res) => {
             res.writeHead(statusCode);
             res.end(payloadString);
 
-            // LOG THE REQUEST
-            console.log(`${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
+            const acceptableCodes = [200, 201, 300, 301];
+
+            // LOG THE REQUEST AS GREEN OR RED
+            if (acceptableCodes.indexOf(statusCode) > -1) {
+                debug('\x1b[32m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
+            } else {
+                debug('\x1b[31m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
+            }
         });
     });
 };
@@ -113,12 +123,12 @@ server.router = {
 server.init = () => {
     // START HTTP SERVER
     server.httpServer.listen(config.httpPort, () => {
-        console.log(`${ config.envName.toUpperCase() } - PORT: ${ config.httpPort } is running...`);
+        console.log('\x1b[36m%s\x1b[0m', `${ config.envName.toUpperCase() } - PORT: ${ config.httpPort } is running...`);
     });
 
     // START HTTPS SERVER
     server.httpsServer.listen(config.httpsPort, () => {
-        console.log(`${ config.envName.toUpperCase() } - PORT: ${ config.httpsPort } is running...`);
+        console.log('\x1b[35m%s\x1b[0m', `${ config.envName.toUpperCase() } - PORT: ${ config.httpsPort } is running...`);
     });
 };
 

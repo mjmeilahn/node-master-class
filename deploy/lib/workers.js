@@ -5,6 +5,10 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const url = require('url');
+const util = require('util');
+
+// CONDITIONALLY SHOW CONSOLE.LOGS WITH NODE_DEBUG=workers
+const debug = util.debuglog('workers');
 
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
@@ -25,12 +29,12 @@ workers.gatherAllChecks = () => {
                     if (!err && originalCheckData) {
                         workers.validateCheckData(originalCheckData);
                     } else {
-                        console.log('Error: reading one of the check\'s data');
+                        debug('Error: reading one of the check\'s data');
                     }
                 });
             });
         } else {
-            console.log('Error: could not find any checks to process');
+            debug('Error: could not find any checks to process');
         }
     });
 };
@@ -55,7 +59,7 @@ workers.validateCheckData = data => {
     if (data.id && data.phone && data.protocol && data.url && data.method && data.successCodes && data.timeoutSeconds) {
         workers.performCheck(data);
     } else {
-        console.log('Error: one of the checks is not properly formatted');
+        debug('Error: one of the checks is not properly formatted');
     }
 };
 
@@ -102,8 +106,8 @@ workers.performCheck = data => {
         // UPDATE THE CHECKOUTCOME & PASS DATA
         checkOutcome.error = { 'error' : true, 'value' : e };
         if (!outcomeSent) {
-            console.log('outcome error happened');
-            // console.log(e);
+            debug('outcome error happened');
+            // debug(e);
             workers.processCheckOutcome(data, checkOutcome);
             outcomeSent = true;
         }
@@ -114,7 +118,7 @@ workers.performCheck = data => {
         // UPDATE THE CHECKOUTCOME & PASS DATA
         checkOutcome.error = { 'error' : true, 'value' : 'timeout' };
         if (!outcomeSent) {
-            console.log('outcome timeout happened');
+            debug('outcome timeout happened');
             workers.processCheckOutcome(data, checkOutcome);
             outcomeSent = true;
         }
@@ -146,10 +150,10 @@ workers.processCheckOutcome = (data, outcome) => {
             if (alertNeeded) {
                 workers.alertStatus(newCheckData);
             } else {
-                console.log('Check outcome has not changed, no alert needed');
+                debug('Check outcome has not changed, no alert needed');
             }
         } else {
-            console.log('Error: could not save check updates');
+            debug('Error: could not save check updates');
         }
     });
 };
@@ -159,9 +163,9 @@ workers.alertStatus = data => {
     const msg = `Alert: Your check data for ${data.method.toUpperCase()}- ${data.protocol}://${data.url} is currently ${data.state}`;
     helpers.sendTwilioSms(data.phone, msg, (err, callback) => {
         if (!err) {
-            console.log(`Success! User was alerted to a status change in their check via SMS:\n${msg}`);
+            debug(`Success! User was alerted to a status change in their check via SMS:\n${msg}`);
         } else {
-            console.log('Error: could not send SMS alert who had a state change in their check.');
+            debug('Error: could not send SMS alert who had a state change in their check.');
         }
     });
 }
@@ -185,25 +189,74 @@ workers.log = (data, outcome, state, alertNeeded, timeOfCheck) => {
     // APPEND LOG STRING TO FILE
     logs.append(logFileName, logString, err => {
         if (!err) {
-            console.log('SUCCESS: Logging to file');
+            debug('SUCCESS: Logging to file');
         } else {
-            console.log('ERROR: Logging failed');
+            debug('ERROR: Logging failed');
         }
     });
 };
 
+// TIMER TO RUN WORKERS ONCE PER MINUTE
 workers.loop = () => {
     setInterval(() => {
         workers.gatherAllChecks();
-    }, 1000 * 5); // ONCE PER FIVE SECONDS
+    }, 1000 * 60);
+};
+
+// ROTATE / COMPRESS THE LOG FILES
+workers.rotateLogs = () => {
+    // LIST ALL NON-COMPRESSED LOGS
+    logs.list(false, (err, allLogs) => {
+        if (!err && allLogs) {
+            allLogs.forEach(logName => {
+                // COMPARE LOG DATA TO ANOTHER FILE
+                const logID = logName.replace('.log', '');
+                const newLogID = logID + '-' + Date.now();
+                logs.compress(logID, newLogID, err => {
+                    if (!err) {
+                        // TRUNCATE THE LOG
+                        logs.truncate(logID, err => {
+                            if (!err) {
+                                debug('Success truncating log file');
+                            } else {
+                                debug('Error truncating log file');
+                            }
+                        });
+                    } else {
+                        debug('Error compressing one of log files', err);
+                    }
+                });
+            });
+        } else {
+            debug('Error: could not find logs to rotate');
+        }
+    });
+};
+
+// TIMER TO RUN LOG ROTATION ONCE PER DAY
+workers.logRotationLoop = () => {
+    setInterval(() => {
+        workers.rotateLogs();
+    }, 1000 * 60 * 60 * 24);
 };
 
 workers.init = () => {
+
+    // SEND TO CONSOLE IN YELLOW
+    console.log('\x1b[33m%s\x1b[0m', 'Background workers are running');
+
     // ON APP STARTUP
     workers.gatherAllChecks();
 
     // CONTINUE BACKGROUND PROCESS
     workers.loop();
+
+    // COMPRESS ALL LOGS
+    workers.rotateLogs();
+
+    // CALL COMPRESSION LOOP
+    // SO LOGS WILL EVENTUALLY BE COMPRESSED
+    workers.logRotationLoop();
 };
 
 module.exports = workers;
