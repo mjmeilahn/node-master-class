@@ -3,7 +3,6 @@
 * @TODO: Online course has heavy nested callbacks targeting earlier versions of JavaScript (ES5) - refactor into Promise pattern after course is finished :/
 */
 
-
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
 const helpers = require('./helpers');
@@ -11,6 +10,52 @@ const type = require('./type');
 const config = require('./config');
 
 let handlers = {};
+
+
+/* * * * * * * * * * * * * *
+*       HMTL HANDLERS        
+* * * * * * * * * * * * * * */
+
+// INDEX HANDLER
+handlers.index = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'This is the title',
+            'head.description' : 'This is meta description',
+            'body.title' : 'Hello template world!',
+            'body.class' : 'index'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('index', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+
+
+
+
+
+/* * * * * * * * * * * * * * * * * *
+*         JSON API HANDLERS         
+* * * * * * * * * * * * * * * * * * */
 
 // USERS HANDLER
 handlers.users = (data, callback) => {

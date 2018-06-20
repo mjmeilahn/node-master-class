@@ -1,6 +1,9 @@
 
 // SERVER-RELATED TASKS
 
+
+// @TODO: Refactor function arguments as ES6 default arguments
+
 // VANILLA NODE DEPENDENCIES
 const fs = require('fs');
 const http = require('http');
@@ -82,20 +85,29 @@ server.unifiedServer = (req, res) => {
         };
 
         // ROUTE TO THE REQUEST SPECIFIED IN CHOSENHANDLER
-        chosenHandler(data, (statusCode, payload) => {
+        chosenHandler(data, (statusCode, payload, contentType) => {
+            // DETERMINE RESPONSE, FALLBACK TO JSON
+            contentType = typeof(contentType) == 'string' ? contentType : 'json';
+
             // USE THE STATUS CODE CALLED BACK BY THE HANDLER...
             // OR DEFAULT TO 200
             statusCode = (typeof(statusCode) == 'number') ? statusCode : 200;
 
-            // USE THE PAYLOAD CALLED BACK BY THE HANDLER...
-            // OR DEFAULT TO AN EMPTY OBJECT
-            payload = (typeof(payload) == 'object') ? payload : {};
+            // RETURN RESPONSE PARTS THAT ARE CONTENT-SPECIFIC
+            let payloadString = '';
 
-            // CONVERT THE PAYLOAD TO A STRING
-            const payloadString = JSON.stringify(payload);
+            if (contentType == 'json') {
+                res.setHeader('Content-Type', 'application/json');
+                payload = (typeof(payload) == 'object') ? payload : {};
+                payloadString = JSON.stringify(payload);
+            }
+
+            if (contentType == 'html') {
+                res.setHeader('Content-Type', 'text/html');
+                payloadString = typeof(payload) == 'string' ? payload : '';
+            }
 
             // RETURN THE RESPONSE
-            res.setHeader('Content-Type', 'application/json');
             res.writeHead(statusCode);
             res.end(payloadString);
 
@@ -113,10 +125,19 @@ server.unifiedServer = (req, res) => {
 
 // DEFINE A REQUEST ROUTER
 server.router = {
+    '' : handlers.index,
+    'account/create' : handlers.accountCreate,
+    'account/edit' : handlers.accountEdit,
+    'account/deleted' : handlers.accountDeleted,
+    'session/create' : handlers.sessionCreate,
+    'session/deleted' : handlers.sessionDeleted,
+    'checks/all' : handlers.checksList,
+    'checks/create' : handlers.checksCreate,
+    'checks/edit' : handlers.checksEdit,
     'ping' : handlers.ping,
-    'users' : handlers.users,
-    'tokens' : handlers.tokens,
-    'checks' : handlers.checks
+    'api/users' : handlers.users,
+    'api/tokens' : handlers.tokens,
+    'api/checks' : handlers.checks
 };
 
 
