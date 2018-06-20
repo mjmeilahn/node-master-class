@@ -1,5 +1,5 @@
 # THE NODE.JS MASTER CLASS
-Following along with https://pirple.thinkific.com/ - also available on Udemy at https://www.udemy.com/the-nodejs-master-class/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features without the NPM library and/or package.json
+Following along with https://pirple.thinkific.com/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features without the NPM library and/or package.json
 
 #### Node Version: 
 8.11.2+
