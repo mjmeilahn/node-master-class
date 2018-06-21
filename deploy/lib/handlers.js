@@ -49,7 +49,70 @@ handlers.index = (data, callback) => {
 };
 
 
+// FAVICON HANDLER
+handlers.favicon = (data, callback) => {
+    if (data.method == 'GET') {
+        // READ FAVICON DATA
+        helpers.getStaticAsset('favicon.ico', (err, data) => {
+            if (!err && data) {
+                callback(200, data, 'favicon');
+            } else {
+                callback(500);
+            }
+        });
+    } else {
+        callback(405);
+    }
+};
 
+
+// PUBLIC ASSETS
+handlers.public = (data, callback) => {
+    if (data.method == 'GET') {
+        // GET FILE NAME BEING REQUESTED
+        const trimmedAssetName = data.trimmedPath
+                                        .replace('public/', '')
+                                        .trim();
+        if (trimmedAssetName.length > 0) {
+            // READ ASSET DATA
+            helpers.getStaticAsset(trimmedAssetName, (err, data) => {
+                if (!err && data) {
+                    // DETERMINE CONTENT TYPE
+                    // DEFAULT TO PLAIN TEXT IF NO TYPE SPECIFIED
+                    let contentType = 'plain';
+
+                    if (trimmedAssetName.indexOf('.css') > -1) {
+                        contentType = 'css';
+                    }
+
+                    if (trimmedAssetName.indexOf('.js') > -1) {
+                        contentType = 'js';
+                    }
+
+                    if (trimmedAssetName.indexOf('.png') > -1) {
+                        contentType = 'png';
+                    }
+
+                    if (trimmedAssetName.indexOf('.jpg') > -1) {
+                        contentType = 'jpg';
+                    }
+
+                    if (trimmedAssetName.indexOf('.ico') > -1) {
+                        contentType = 'ico';
+                    }
+
+                    callback(200, data, contentType);
+                } else {
+                    callback(404);
+                }
+            });
+        } else {
+            callback(404);
+        }
+    } else {
+        callback(405);
+    }
+};
 
 
 

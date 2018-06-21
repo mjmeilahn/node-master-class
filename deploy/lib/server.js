@@ -73,7 +73,11 @@ server.unifiedServer = (req, res) => {
 
         // CHOOSE HANDLER FOR REQUEST
         // IF NOT FOUND, USE 404 HANDLER
-        const chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : handlers.notFound;
+        let chosenHandler = typeof(server.router[trimmedPath]) !== 'undefined' ? server.router[trimmedPath] : handlers.notFound;
+
+        // IF REQUEST IS WITHIN /PUBLIC ...
+        // USE PUBLIC ROUTE HANDLER
+        chosenHandler = trimmedPath.indexOf('public/') > -1 ? handlers.public : chosenHandler;
 
         // CONSTRUCT THE DATA OBJECT TO SEND TO HANDLER
         const data = {
@@ -107,6 +111,36 @@ server.unifiedServer = (req, res) => {
                 payloadString = typeof(payload) == 'string' ? payload : '';
             }
 
+            if (contentType == 'favicon') {
+                res.setHeader('Content-Type', 'image/x-icon');
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            }
+
+            if (contentType == 'css') {
+                res.setHeader('Content-Type', 'text/css');
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            }
+
+            if (contentType == 'js') {
+                res.setHeader('Content-Type', 'text/javascript');
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            }
+
+            if (contentType == 'png') {
+                res.setHeader('Content-Type', 'image/png');
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            }
+
+            if (contentType == 'jpg') {
+                res.setHeader('Content-Type', 'image/jpeg');
+                payloadString = typeof(payload) !== 'undefined' ? payload : '';
+            }
+
+            if (contentType == 'plain') {
+                res.setHeader('Content-Type', 'text/plain');
+                payloadString = typeof(payload) == 'string' ? payload : '';
+            }
+
             // RETURN THE RESPONSE
             res.writeHead(statusCode);
             res.end(payloadString);
@@ -137,7 +171,9 @@ server.router = {
     'ping' : handlers.ping,
     'api/users' : handlers.users,
     'api/tokens' : handlers.tokens,
-    'api/checks' : handlers.checks
+    'api/checks' : handlers.checks,
+    'favicon.ico' : handlers.favicon,
+    'public' : handlers.public
 };
 
 

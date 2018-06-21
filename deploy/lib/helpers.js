@@ -196,4 +196,22 @@ helpers.interpolate = (str, data) => {
     return str;
 };
 
+// GET CONTENTS OF STATIC/PUBLIC ASSET
+helpers.getStaticAsset = (fileName, callback) => {
+    fileName = type.string(fileName);
+
+    if (fileName) {
+        const publicDir = path.join(__dirname, '/../public/');
+        fs.readFile(publicDir + fileName, (err, data) => {
+            if (!err && data) {
+                callback(false, data);
+            } else {
+                callback('no file could be found');
+            }
+        });
+    } else {
+        callback('A valid file name was not specified');
+    }
+};
+
 module.exports = helpers;
