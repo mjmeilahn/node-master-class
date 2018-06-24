@@ -22,9 +22,8 @@ handlers.index = (data, callback) => {
     if (data.method == 'GET') {
         // PREPARE DATA FOR INTERPOLATION
         const templateData = {
-            'head.title' : 'This is the title',
-            'head.description' : 'This is meta description',
-            'body.title' : 'Hello template world!',
+            'head.title' : 'Uptime Monitoring - Made Simple',
+            'head.description' : 'We offer free, simple uptime monitoring HTTP/HTTPS sites of all kinds. When your site goes down, we\'ll send you a text to let you know',
             'body.class' : 'index'
         };
 
@@ -48,6 +47,251 @@ handlers.index = (data, callback) => {
     }
 };
 
+
+// CREATE ACCOUNT HANDLER
+handlers.accountCreate = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Create An Account',
+            'head.description' : 'Signup is easy and only takes a few seconds',
+            'body.class' : 'accountCreate'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('accountCreate', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// EDIT ACCOUNT HANDLER
+handlers.accountEdit = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Account Settings',
+            'body.class' : 'accountEdit'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('accountEdit', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// ACCOUNT HAS BEEN DELETED HANDLER
+handlers.accountDeleted = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Account Deleted',
+            'head.description' : 'Your account has been deleted',
+            'body.class' : 'accountDeleted'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('accountDeleted', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+
+// SESSION CREATE HANDLER
+handlers.sessionCreate = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Log in to you Account',
+            'head.description' : 'Please enter your phone number and password to access your account',
+            'body.class' : 'sessionCreate'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('sessionCreate', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// SESSION DELETE HANDLER
+handlers.sessionDeleted = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Logged Out',
+            'head.description' : 'You have been logged out of your account',
+            'body.class' : 'sessionDeleted'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('sessionDeleted', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// CHECK CREATE HANDLER
+handlers.checksCreate = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Create a new Check',
+            'body.class' : 'checksCreate'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('checksCreate', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// VIEW ALL CHECKS HANDLER
+handlers.checksList = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Dashboard',
+            'body.class' : 'checksList'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('checksList', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
+
+// EDIT CHECKS HANDLER
+handlers.checksEdit = (data, callback) => {
+    // REJECT ANY REQUEST THAT ISN'T A HTTP(S) "GET"
+    if (data.method == 'GET') {
+        // PREPARE DATA FOR INTERPOLATION
+        const templateData = {
+            'head.title' : 'Check Details',
+            'body.class' : 'checksEdit'
+        };
+
+        // READ TEMPLATE AS A STRING
+        helpers.getTemplate('checksEdit', templateData, (err, str) => {
+            if (!err && str) {
+                // ADD UNIVERSAL HEADER & FOOTER
+                helpers.addUniversalTemplate(str, templateData, (err, str) => {
+                    if (!err && str) {
+                        callback(200, str, 'html');
+                    } else {
+                        callback(500, undefined, 'html');
+                    }
+                });
+            } else {
+                callback(500, undefined, 'html');
+            }
+        });
+    } else {
+        callback(405, undefined, 'html');
+    }
+};
 
 // FAVICON HANDLER
 handlers.favicon = (data, callback) => {
