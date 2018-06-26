@@ -1,5 +1,5 @@
 # THE NODE.JS MASTER CLASS
-Following along with https://pirple.thinkific.com/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features without the NPM library and/or package.json
+No ExpressJS. No NPM. No package.json. Following along with https://pirple.thinkific.com/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features. I initially came by this course from a YouTube ad challenging Node/JS devs to learn Node without the luxuries of ExpressJS, NPM or package.json
 
 #### Node Version: 
 8.11.2+
@@ -8,9 +8,9 @@ Following along with https://pirple.thinkific.com/ - course is instructed by the
 Presented in ES5, I'm translating over to ES6+ versions and refactoring some course spaghetti code into readable helper libraries which'll take a while :/
 
 #### Course Includes: 
-    1. Building RESTful API
+    1. Building RESTful API for CRUD operations
 
-    2. Building Web App GUI
+    2. Building Web App GUI for Monitoring Up or Down Websites
 
     3. Building a CLI
 
@@ -18,5 +18,11 @@ Presented in ES5, I'm translating over to ES6+ versions and refactoring some cou
 
     5. Understanding Performance
 
-#### Course Review:
-This was my first ambitious project tackling vanilla Node without NPM or package.json dependencies and literally know what is happening when a Node instance is being run and what moving parts are involved.
+#### Try It Out!
+    1. Git clone this repo
+
+    2. Run "node index.js"
+
+    3. Run "help" in terminal to see available commands - and try some out
+
+    4. Visit localhost:3000 in a browser - and try the interface

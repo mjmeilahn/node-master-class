@@ -1,7 +1,6 @@
 
 // LIBRARY FOR STORING & ROTATING LOGS/GZIP FILES
 
-// @TODO: Refactor callbacks into Promise pattern
 
 // VANILLA NODE DEPENDENCIES
 const fs = require('fs');

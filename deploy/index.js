@@ -5,6 +5,7 @@
 // LOCAL FILE DEPENDENCIES
 const server = require('./lib/server');
 const workers = require('./lib/workers');
+const cli = require('./lib/cli');
 
 let app = {};
 
@@ -13,8 +14,14 @@ app.init = () => {
     server.init();
 
     // START CRON JOB
-    // IN A REAL APP, CRON SHOULD HAPPEN OUTSIDE APPLICATION LAYER
+    // IN A REAL APP..
+    // FILE(S) CRON SHOULD HAPPEN OUTSIDE APPLICATION LAYER
     workers.init();
+
+    // START CLI LAST
+    setTimeout(() => {
+        cli.init();
+    }, 50);
 };
 
 // START APP

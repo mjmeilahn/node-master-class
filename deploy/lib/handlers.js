@@ -1,8 +1,4 @@
 
-/*
-* @TODO: Online course has heavy nested callbacks targeting earlier versions of JavaScript (ES5) - refactor into Promise pattern after course is finished :/
-*/
-
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
 const helpers = require('./helpers');
