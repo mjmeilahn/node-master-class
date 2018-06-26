@@ -1,11 +1,13 @@
 # THE NODE.JS MASTER CLASS
-No ExpressJS. No NPM. No package.json. Following along with https://pirple.thinkific.com/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features. I initially came by this course from a YouTube ad challenging Node/JS devs to learn Node without the luxuries of ExpressJS, NPM or package.json
+No ExpressJS. No NPM. No package.json. Following along with https://pirple.thinkific.com/ - course is instructed by the talented Leslie Lewis and covers powerful vanilla Node features including File System, Path, HTTP, HTTPS, Crypto, Util, GZip, Event Emitter, and many more. 
+
+I initially came by this course from a YouTube ad challenging Node/JS devs to learn Node without the luxuries of ExpressJS, NPM or package.json
 
 #### Node Version: 
 8.11.2+
 
 #### JavaScript Version: 
-Presented in ES5, I'm translating over to ES6+ versions and refactoring some course spaghetti code into readable helper libraries which'll take a while :/
+Presented in ES5, I'm translating over to ES6+ versions and refactoring some course spaghetti code :/
 
 #### Course Includes: 
     1. Building RESTful API for CRUD operations
