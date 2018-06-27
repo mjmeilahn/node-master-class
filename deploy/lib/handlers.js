@@ -981,6 +981,13 @@ handlers._checks.delete = (data, callback) => {
 };
 
 
+// EXAMPLE ERROR HANDLER
+handlers.exampleError = (data, callback) => {
+    const error = new Error('This is an example error');
+    throw(error);
+};
+
+
 // PING HANDLER
 handlers.ping = (data, callback) => {
     callback(200);

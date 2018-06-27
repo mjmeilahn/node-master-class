@@ -88,73 +88,83 @@ server.unifiedServer = (req, res) => {
             'payload' : helpers.parseJsonToObject(buffer)
         };
 
-        // ROUTE TO THE REQUEST SPECIFIED IN CHOSENHANDLER
-        chosenHandler(data, (statusCode, payload, contentType) => {
-            // DETERMINE RESPONSE, FALLBACK TO JSON
-            contentType = typeof(contentType) == 'string' ? contentType : 'json';
-
-            // USE THE STATUS CODE CALLED BACK BY THE HANDLER...
-            // OR DEFAULT TO 200
-            statusCode = (typeof(statusCode) == 'number') ? statusCode : 200;
-
-            // RETURN RESPONSE PARTS THAT ARE CONTENT-SPECIFIC
-            let payloadString = '';
-
-            if (contentType == 'json') {
-                res.setHeader('Content-Type', 'application/json');
-                payload = (typeof(payload) == 'object') ? payload : {};
-                payloadString = JSON.stringify(payload);
-            }
-
-            if (contentType == 'html') {
-                res.setHeader('Content-Type', 'text/html');
-                payloadString = typeof(payload) == 'string' ? payload : '';
-            }
-
-            if (contentType == 'favicon') {
-                res.setHeader('Content-Type', 'image/x-icon');
-                payloadString = typeof(payload) !== 'undefined' ? payload : '';
-            }
-
-            if (contentType == 'css') {
-                res.setHeader('Content-Type', 'text/css');
-                payloadString = typeof(payload) !== 'undefined' ? payload : '';
-            }
-
-            if (contentType == 'js') {
-                res.setHeader('Content-Type', 'text/javascript');
-                payloadString = typeof(payload) !== 'undefined' ? payload : '';
-            }
-
-            if (contentType == 'png') {
-                res.setHeader('Content-Type', 'image/png');
-                payloadString = typeof(payload) !== 'undefined' ? payload : '';
-            }
-
-            if (contentType == 'jpg') {
-                res.setHeader('Content-Type', 'image/jpeg');
-                payloadString = typeof(payload) !== 'undefined' ? payload : '';
-            }
-
-            if (contentType == 'plain') {
-                res.setHeader('Content-Type', 'text/plain');
-                payloadString = typeof(payload) == 'string' ? payload : '';
-            }
-
-            // RETURN THE RESPONSE
-            res.writeHead(statusCode);
-            res.end(payloadString);
-
-            const acceptableCodes = [200, 201, 300, 301];
-
-            // LOG THE REQUEST AS GREEN OR RED
-            if (acceptableCodes.indexOf(statusCode) > -1) {
-                debug('\x1b[32m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
-            } else {
-                debug('\x1b[31m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
-            }
-        });
+        try {
+            // ROUTE TO THE REQUEST SPECIFIED IN CHOSENHANDLER
+            chosenHandler(data, (statusCode, payload, contentType) => {
+                server.processHandlerResponse(data, res, statusCode, payload, contentType);
+            });
+        } catch (e) {
+            debug(e);
+            server.processHandlerResponse(data, res, 500, {'Error':'An unknown error has occurred.'}, 'json');
+        }
     });
+};
+
+// PROCESS RESPONSE FROM HANDLER
+server.processHandlerResponse = (data, res, statusCode, payload, contentType) => {
+    // DETERMINE RESPONSE, FALLBACK TO JSON
+    contentType = typeof(contentType) == 'string' ? contentType : 'json';
+
+    // USE THE STATUS CODE CALLED BACK BY THE HANDLER...
+    // OR DEFAULT TO 200
+    statusCode = (typeof(statusCode) == 'number') ? statusCode : 200;
+
+    // RETURN RESPONSE PARTS THAT ARE CONTENT-SPECIFIC
+    let payloadString = '';
+
+    if (contentType == 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        payload = (typeof(payload) == 'object') ? payload : {};
+        payloadString = JSON.stringify(payload);
+    }
+
+    if (contentType == 'html') {
+        res.setHeader('Content-Type', 'text/html');
+        payloadString = typeof(payload) == 'string' ? payload : '';
+    }
+
+    if (contentType == 'favicon') {
+        res.setHeader('Content-Type', 'image/x-icon');
+        payloadString = typeof(payload) !== 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'css') {
+        res.setHeader('Content-Type', 'text/css');
+        payloadString = typeof(payload) !== 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'js') {
+        res.setHeader('Content-Type', 'text/javascript');
+        payloadString = typeof(payload) !== 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'png') {
+        res.setHeader('Content-Type', 'image/png');
+        payloadString = typeof(payload) !== 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'jpg') {
+        res.setHeader('Content-Type', 'image/jpeg');
+        payloadString = typeof(payload) !== 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'plain') {
+        res.setHeader('Content-Type', 'text/plain');
+        payloadString = typeof(payload) == 'string' ? payload : '';
+    }
+
+    // RETURN THE RESPONSE
+    res.writeHead(statusCode);
+    res.end(payloadString);
+
+    const acceptableCodes = [200, 201, 300, 301];
+
+    // LOG THE REQUEST AS GREEN OR RED
+    if (acceptableCodes.indexOf(statusCode) > -1) {
+        debug('\x1b[32m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
+    } else {
+        debug('\x1b[31m%s\x1b[0m', `${ data.method }: /${ data.trimmedPath }`, data.queryStringObject, statusCode, payloadString);
+    }
 };
 
 // DEFINE A REQUEST ROUTER
@@ -173,7 +183,8 @@ server.router = {
     'api/tokens' : handlers.tokens,
     'api/checks' : handlers.checks,
     'favicon.ico' : handlers.favicon,
-    'public' : handlers.public
+    'public' : handlers.public,
+    'examples/error' : handlers.exampleError
 };
 
 
