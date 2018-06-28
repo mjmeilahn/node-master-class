@@ -1,4 +1,13 @@
 
+
+// VANILLA NODE DEPENDENCIES
+const _url = require('url');
+const dns = require('dns');
+const { performance } = require('perf_hooks');
+const util = require('util');
+const debug = util.debuglog('performance');
+
+
 // LOCAL FILE DEPENDENCIES
 const file = require('./file');
 const helpers = require('./helpers');
@@ -373,11 +382,6 @@ handlers.users = (data, callback) => {
 };
 
 
-
-/*
-* @TODO: Refactor handlers._users to Promise pattern
-*/
-
 handlers._users = {};
 
 // USERS - POST
@@ -432,7 +436,6 @@ handlers._users.post = (data, callback) => {
 
 // USERS - GET
 // REQUIRED: PHONE
-/* @TODO: Refactor to Promise pattern */
 handlers._users.get = (data, callback) => {
     // CHECK PHONE NUMBER IS VALID
     const phone = type.phone(data.queryStringObject.phone);
@@ -466,7 +469,6 @@ handlers._users.get = (data, callback) => {
 // USERS - PUT
 // REQUIRED: PHONE
 // OPTIONAL: FIRST NAME, LAST NAME, PASSWORD - AT LEAST ONE MUST BE SPECIFIED
-/* @TODO Refactor into Promise pattern */
 handlers._users.put = (data, callback) => {
     // CHECK PHONE NUMBER IS VALID
     const phone = type.phone(data.payload.phone);
@@ -599,22 +601,34 @@ handlers._tokens = {};
 
 // TOKENS - POST
 // REQUIRED: PHONE, PASSWORD
-/* @TODO: Refactor into promise pattern */
 handlers._tokens.post = (data, callback) => {
+    performance.mark('entered TOKEN POST function');
+
     const phone = type.phone(data.payload.phone);
     const password = type.string(data.payload.password);
 
+    performance.mark('inputs validated');
+
     if (phone && password) {
+        performance.mark('beginning user lookup');
+
         // LOOK UP MATCHING USER
         file.read('users', phone, (err, userData) => {
+            performance.mark('user lookup complete');
             if (!err && userData) {
+                performance.mark('beginning password hash');
                 // HASH THE SENT PASSWORD
                 // COMPARE AGAINST STORED PASSWORD
                 const hashedPassword = helpers.hash(password);
+
+                performance.mark('password hash complete');
                 if (hashedPassword == userData.hashedPassword) {
+                    performance.mark('creating data for token');
                     // CREATE TOKEN WITH RANDOM NAME
                     // SET EXPIRATION DATE 1 HOUR IN FUTURE
                     const tokenId = helpers.createRandomString(20);
+
+
                     const expires = Date.now() + 1000 * 60 * 60;
 
                     const tokenObject = {
@@ -624,7 +638,30 @@ handlers._tokens.post = (data, callback) => {
                     };
 
                     // STORE TOKEN
+                    performance.mark('beginning storing token');
                     file.create('tokens', tokenId, tokenObject, err => {
+                        performance.mark('storing token complete');
+
+                        // GATHER ALL PERFORMANCE BENCHMARKS
+                        performance.measure('Beginning to End', 'entered TOKEN POST function', 'storing token complete');
+
+                        performance.measure('Validating user input', 'entered TOKEN POST function', 'inputs validated');
+
+                        performance.measure('User lookup', 'beginning user lookup', 'user lookup complete');
+
+                        performance.measure('Password hashing', 'beginning password hash', 'password hash complete');
+
+                        performance.measure('Token data creation', 'creating data for token', 'beginning storing token');
+
+                        performance.measure('Token storing data', 'beginning storing token', 'storing token complete');
+
+                        // LOG ALL MEASUREMENTS
+                        const measurements = performance.getEntriesByType('measure');
+
+                        measurements.forEach(measurement => {
+                            debug('\x1b[33m%s\x1b[0m', measurement.name + ' ' + measurement.duration);
+                        });
+
                         if (!err) {
                             callback(200, tokenObject);
                         } else {
@@ -645,7 +682,6 @@ handlers._tokens.post = (data, callback) => {
 
 // TOKENS - PUT
 // REQUIRED: ID, EXTEND
-/* @TODO: Refactor into Promise pattern */
 handlers._tokens.put = (data, callback) => {
     // CHECK ID IS VALID
     const id = type.id(data.payload.id);
@@ -682,7 +718,6 @@ handlers._tokens.put = (data, callback) => {
 
 // TOKENS - GET
 // REQUIRED: ID
-/* @TODO: Refactor into Promise pattern */
 handlers._tokens.get = (data, callback) => {
     // CHECK ID IS VALID
     const id = type.id(data.queryStringObject.id);
@@ -757,7 +792,6 @@ handlers._checks = {};
 
 // CHECKS - POST
 // REQUIRED: PROTOCOL, URL, HTTP METHOD, SUCCESS CODE, TIMEOUT SECONDS
-/* @TODO: Refactor into Promise pattern */
 handlers._checks.post = (data, callback) => {
     // VALIDATE INCOMING DATA
     const protocol = type.protocol(data.payload.protocol);
@@ -782,37 +816,49 @@ handlers._checks.post = (data, callback) => {
 
                         // VERIFY USER HAS LESS THAN 5 CHECKS
                         if (userChecks.length < config.maxChecks) {
-                            // CREATE RANDOM ID FOR NEW CHECK
-                            const checkId = helpers.createRandomString(20);
 
-                            // CREATE CHECK OBJECT, INCLUDE USER PHONE
-                            const checkObject = {
-                                'id' : checkId,
-                                'phone' : userPhone,
-                                'protocol' : protocol,
-                                'url' : url,
-                                'method' : method,
-                                'successCodes' : successCodes,
-                                'timeoutSeconds' : timeoutSeconds
-                            };
+                            // VERIFY URL HAS DNS ENTRIES
+                            const parsedURL = _url.parse(`${protocol}://${url}`, true);
 
-                            // STORE THE DATA
-                            file.create('checks', checkId, checkObject, err => {
-                                if (!err) {
-                                    // ADD THE CHECK ID TO USER OBJECT
-                                    userData.checks = userChecks;
-                                    userData.checks.push(checkId);
+                            const hostName = type.string(parsedURL.hostname);
 
-                                    // SAVE THE NEW USER DATA
-                                    file.update('users', userPhone, userData, err => {
+                            dns.resolve(hostName, (err, records) => {
+                                if (!err && records) {
+                                    // CREATE RANDOM ID FOR NEW CHECK
+                                    const checkId = helpers.createRandomString(20);
+
+                                    // CREATE CHECK OBJECT, INCLUDE USER PHONE
+                                    const checkObject = {
+                                        'id' : checkId,
+                                        'phone' : userPhone,
+                                        'protocol' : protocol,
+                                        'url' : url,
+                                        'method' : method,
+                                        'successCodes' : successCodes,
+                                        'timeoutSeconds' : timeoutSeconds
+                                    };
+
+                                    // STORE THE DATA
+                                    file.create('checks', checkId, checkObject, err => {
                                         if (!err) {
-                                            callback(200, checkObject);
+                                            // ADD THE CHECK ID TO USER OBJECT
+                                            userData.checks = userChecks;
+                                            userData.checks.push(checkId);
+
+                                            // SAVE THE NEW USER DATA
+                                            file.update('users', userPhone, userData, err => {
+                                                if (!err) {
+                                                    callback(200, checkObject);
+                                                } else {
+                                                    callback(500, {'Error':'Could not update user with new check'});
+                                                }
+                                            })
                                         } else {
-                                            callback(500, {'Error':'Could not update user with new check'});
+                                            callback(500, {'Error':'Could not create new check'});
                                         }
-                                    })
+                                    });
                                 } else {
-                                    callback(500, {'Error':'Could not create new check'});
+                                    callback(400, {'Error': 'The host name of URL did not resolve to any DNS entries'});
                                 }
                             });
                         } else {
@@ -865,7 +911,6 @@ handlers._checks.get = (data, callback) => {
 
 // CHECKS - PUT
 // REQUIRED - ID & AT LEAST ONE OF: PROTOCOL, URL, METHOD, SUCCESSCODES OR TIMEOUT SECONDS
-/* @TODO: Refactor into Promise pattern */
 handlers._checks.put = (data, callback) => {
     const id = type.id(data.payload.id);
     const protocol = type.protocol(data.payload.protocol);
@@ -918,7 +963,6 @@ handlers._checks.put = (data, callback) => {
 
 // CHECKS - DELETE
 // REQUIRED: ID
-/* @TODO: Refactor into Promise pattern */
 handlers._checks.delete = (data, callback) => {
     // CHECK ID IS VALID
     const id = type.id(data.queryStringObject.id);

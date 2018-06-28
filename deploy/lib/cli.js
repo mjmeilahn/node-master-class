@@ -1,5 +1,6 @@
 
 // VANILLA NODE DEPENDENCIES
+const childProcess = require('child_process');
 const readline = require('readline');
 const os = require('os');
 const v8 = require('v8');
@@ -324,18 +325,27 @@ cli.responders.moreCheckInfo = str => {
 };
 
 cli.responders.listLogs = () => {
-    logs.list(true, (err, logFiles) => {
-        if (!err && logFiles && logFiles.length > 0) {
-            cli.verticalSpace();
+    const ls = childProcess.spawn('ls', ['./.logs/']);
+    ls.stdout.on('data', data => {
+        // EXPLODE INTO SEPARATE LINES
+        const dataStr = data.toString();
+        const fileNames = dataStr.split('\n');
 
-            logFiles.forEach(logFile => {
-                if (logFile.indexOf('-') > -1) {
-                    console.log(logFile);
-                    cli.verticalSpace();
-                }
-            });
-        }
+        cli.verticalSpace();
+
+        fileNames.forEach(logFile => {
+            if (typeof(logFile) == 'string' && logFile.length > 0 && logFile.indexOf('-') > -1) {
+                console.log(logFile.trim().split('.')[0]);
+                cli.verticalSpace();
+            }
+        });
     });
+
+    // logs.list(true, (err, logFiles) => {
+    //     if (!err && logFiles && logFiles.length > 0) {
+            
+    //     }
+    // });
 };
 
 cli.responders.moreLogInfo = str => {

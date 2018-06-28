@@ -2,8 +2,6 @@
 // SERVER-RELATED TASKS
 
 
-// @TODO: Refactor function arguments as ES6 default arguments
-
 // VANILLA NODE DEPENDENCIES
 const fs = require('fs');
 const http = require('http');
