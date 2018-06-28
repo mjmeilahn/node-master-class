@@ -9,24 +9,25 @@ const cli = require('./lib/cli');
 
 let app = {};
 
-app.init = callback => {
+// DECLARE GLOBAL THAT STRICT MODE SHOULD CATCH
+foo = 'bar';
+
+app.init = () => {
     // START SERVER
     server.init();
 
     // START CRON JOB
+    // IN A REAL APP..
+    // FILE(S) CRON SHOULD HAPPEN OUTSIDE APPLICATION LAYER
     workers.init();
 
     // START CLI LAST
     setTimeout(() => {
         cli.init();
-        callback();
     }, 50);
 };
 
-// SELF INVOKE ONLY IF REQUIRED DIRECTLY
-// APP WILL NOT START UNLESS SPECIFIC COMMANDS ARE REQUESTED
-if (require.main == module) {
-    app.init(() => {});
-}
+// START APP
+app.init();
 
 module.exports = app;

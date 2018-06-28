@@ -14,6 +14,14 @@ const type = require('./type');
 
 let helpers = {};
 
+
+
+// FOR TESTING: RETURN ANY NUMBER
+helpers.getANumber = () => {
+    return 1;
+};
+
+
 // HASHES A STRING
 helpers.hash = str => {
     if (typeof(str) == 'string' && str.length > 0) {

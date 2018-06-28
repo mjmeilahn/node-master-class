@@ -45,6 +45,26 @@ environments.production = {
     }
 };
 
+// TESTING
+environments.testing = {
+    'httpPort' : 4000,
+    'httpsPort' : 4001,
+    'envName' : 'testing',
+    'hashingSecret' : 'thisISaSECRET',
+    'maxChecks' : 5,
+    'twilio' : {
+        'accountSid' : 'ACb32d411ad7fe886aac54c665d25e5c5d',
+        'authToken' : '9455e3eb3109edc12e3d8c92768f7a67',
+        'fromPhone' : '+15005550006'
+    },
+    'templateGlobals' : {
+        'appName' : 'UptimeChecker',
+        'companyName' : 'NotARealCompany',
+        'yearCreated' : new Date().getFullYear(),
+        'baseUrl' : 'http://localhost:3000/'
+    }
+};
+
 const currentEnvironment = typeof(process.env.NODE_ENV) == 'string' ? process.env.NODE_ENV.toLowerCase() : '';
 
 // CHECK THAT CURRENT ENVIRONMENT MATCHES, ELSE IT'S STAGING
